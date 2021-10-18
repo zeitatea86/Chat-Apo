@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title> <h1> WHATSAP </h1> </title>
+    <!--Link to CSS -->
+    <link href="../static/bootstrap.min.css" rel="stylesheet" />
+    <link href="../static/style.css" rel="stylesheet" />
+
+    <script type="text/javascript" src="//code.jquery.com/jquery-1.4.2.min.js"></script>
+        <!--<script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/socket.io/1.3.6/socket.io.min.js"></script>-->
+        <script src="https://cdn.socket.io/4.2.0/socket.io.min.js" integrity="sha384-PiBR5S00EtOj2Lto9Uu81cmoyZqR57XcOna1oAuVuIEjzj0wpqDVfD0JA9eXlRsj" crossorigin="anonymous"></script>
+        <script type="text/javascript" charset="utf-8">
+            var socketu_vietii;
+            $(document).ready(function(){
+                socketu_vietii = io.connect('http://' + document.domain + ':' + location.port + '/chat');
+                socketu_vietii.on('connect', function() {
+                    socketu_vietii.emit('join', {});
+                });
+                socketu_vietii.on('status', function(data) {
+                    $('#chat').val($('#chat').val() + '<' + data.msg + '>\n');
+                    $('#chat').scrollTop($('#chat')[0].scrollHeight);
+                });
+                socketu_vietii.on('message', function(data) {
+                    $('#chat').val($('#chat').val() + data.msg + '\n');
+                    $('#chat').scrollTop($('#chat')[0].scrollHeight);
+                });
+                $('#send').click(function(e) {
+                        text = $('#text').val();
+                        $('#text').val('');
+                        socketu_vietii.emit('text', {msg: text});
+                });
+            });
+            function leave_room() {
+                socketu_vietii.emit('left', {}, function() {
+                    socketu_vietii.disconnect();
+                    // go back to the login page
+                    window.location.href = "{{ url_for('index') }}";
+                });
+            }
+        </script>
+  </head>
+
+  <body class="text-center">
+    
+    <div class="chatwindow">
+      <h2 >WHATSAP</h2>
+      <h2>Room : {{session['room']}}</h2><br>
+      <textarea id="chat" cols="70" rows="10" placeholder="Scrieti mesajul mai jos"></textarea><br /><br />
+      <input type="text" id="text" size="60" placeholder="AICI scrie:" />
+      <button type="button" id="send" class="btn btn-success"> TRIMITE </button><br /><br />
+      <center><button type="button" class="btn btn-danger" onclick=leave_room()> IESIRE </button></center>
+    </div>
+  </body>
+</html>
